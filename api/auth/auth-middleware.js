@@ -6,9 +6,18 @@
     "message": "You shall not pass!"
   }
 */
-function restricted() {
+function restricted(req, res, next) {
+if (req.session && req.session.user) {
+  next();
+  } else {
+    res.status(401).json({
+      message: 'you shall not pass'
+    });
+  }
 
-}
+ }
+ 
+
 
 /*
   If the username in req.body already exists in the database
@@ -30,8 +39,17 @@ function checkUsernameFree() {
     "message": "Invalid credentials"
   }
 */
-function checkUsernameExists() {
+function checkUsernameExists(req, res, next) {
+if (user && bcrypt.comparesSync(password, user.password)) {
+  req.session.user = user
+  res.json('welcome back!')
+} else {
+  res.status(401).json({
+ message: "invalid credentials"
+  })
+  .catch(next)
 
+  }
 }
 
 /*
@@ -47,3 +65,10 @@ function checkPasswordLength() {
 }
 
 // Don't forget to add these to the `exports` object so they can be required in other modules
+module.exports = {
+  restricted,
+  checkUsernameFree,
+  checkUsernameExists,
+  checkPasswordLength,
+
+}
